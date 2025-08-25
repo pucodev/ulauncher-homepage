@@ -1,0 +1,9 @@
+CREATE TABLE services (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name VARCHAR(255),
+  description TEXT,
+  href TEXT,
+  icon VARCHAR(255),
+  group_name VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

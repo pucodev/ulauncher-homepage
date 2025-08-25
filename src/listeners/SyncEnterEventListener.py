@@ -1,9 +1,12 @@
 from os import makedirs
 from os.path import join
+from typing import List
 
 import requests
 from ulauncher.api.client.EventListener import EventListener
 
+from src.db.db import run_migrations, save_service
+from src.models.ServiceModel import ServiceModel
 from src.utils.logger import logger
 from src.utils.media import get_service_icon_folder_path
 from src.utils.notification import Notification
@@ -29,12 +32,16 @@ class SyncEnterEventListener(EventListener):
         logger.debug(url)
         logger.debug("-----------------------------------")
 
-        r = requests.get(url, timeout=10)
+        r = requests.get(url, timeout=30)
         if r.status_code == 200:
             with open(file_path, "wb") as f:
                 f.write(r.content)
 
         return str(file_path)
+
+    def _save_db(self, items: List[ServiceModel]):
+        run_migrations()
+        save_service(items, True)
 
     def fetch_data(self, extension):
         notification = Notification()
@@ -42,6 +49,9 @@ class SyncEnterEventListener(EventListener):
 
         try:
             items = self._get_services(extension)
+
+            self._save_db(items)
+
             self._show_sync_result(notification, items)
         except (requests.RequestException, ValueError) as e:
             logger.error(f"Error: {e}")
@@ -50,13 +60,13 @@ class SyncEnterEventListener(EventListener):
                 body="There was an unexpected error, please try again",
             )
 
-    def _get_services(self, extension):
+    def _get_services(self, extension) -> List[ServiceModel]:
         url = extension.preferences.get("api_url")
-        response = requests.get(f"{url}/api/services", timeout=10)
+        response = requests.get(f"{url}/api/services", timeout=30)
         response.raise_for_status()
         data = response.json()
 
-        items = []
+        items: List[ServiceModel] = []
         for group in data:
             group_name = group.get("name")
             services = group.get("services") or []
@@ -67,13 +77,13 @@ class SyncEnterEventListener(EventListener):
                     self.download_icon(icon)
 
                 items.append(
-                    {
-                        "icon": icon,
-                        "name": service["name"],
-                        "description": service.get("description"),
-                        "href": service["href"],
-                        "group_name": group_name,
-                    }
+                    ServiceModel(
+                        icon=icon,
+                        name=service["name"],
+                        description=service.get("description"),
+                        href=service["href"],
+                        group_name=group_name,
+                    )
                 )
         return items
 
