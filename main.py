@@ -1,10 +1,12 @@
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.client.Extension import Extension
 from ulauncher.api.shared.action.ExtensionCustomAction import ExtensionCustomAction
+from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.event import ItemEnterEvent, KeywordQueryEvent
 from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
 
+from src.db.db import search_services
 from src.listeners.SyncEnterEventListener import SyncEnterEventListener
 
 
@@ -20,6 +22,16 @@ class KeywordQueryEventListener(EventListener):
 
     def on_event(self, event, extension):
         items = []
+        services = search_services(event.get_argument() or "")
+        for service in services:
+            items.append(
+                ExtensionResultItem(
+                    icon="images/icon.png",
+                    name=service.name,
+                    description=service.description,
+                    on_enter=OpenUrlAction(service.href),
+                )
+            )
         items.append(
             ExtensionResultItem(
                 icon="images/icon.png",

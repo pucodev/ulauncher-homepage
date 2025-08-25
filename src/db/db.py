@@ -35,7 +35,7 @@ def run_migrations():
     files = sorted(f for f in listdir(MIGRATION_FOLDER) if f.endswith(".sql"))
 
     for file in files:
-        # Verificar si la migración ya se ejecutó
+        # Verify if the migration has already been executed.
         cursor.execute("SELECT * FROM migrations WHERE name = ?", (file,))
         if cursor.fetchone():
             logger.debug(f"Skipping already run migration: {file}")
@@ -71,3 +71,47 @@ def save_service(items: List[ServiceModel], clear_existing=False):
 
     conn.commit()
     conn.close()
+
+
+def search_services(search: str, limit=5) -> List[ServiceModel]:
+    try:
+        conn = _get_conn()
+        cursor = conn.cursor()
+
+        if search.strip() == "":
+            query = """
+                SELECT name, href, icon, description, group_name
+                FROM services
+                LIMIT ?
+            """
+            cursor.execute(query, (limit,))
+        else:
+            query = """
+                SELECT name, href, icon, description, group_name
+                FROM services
+                WHERE name LIKE ? OR description LIKE ?
+                LIMIT ?
+            """
+            pattern = f"%{search}%"
+            cursor.execute(query, (pattern, pattern, limit))
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        logger.debug("----------------------")
+        logger.debug(rows)
+        logger.debug("----------------------")
+
+        return [
+            ServiceModel(
+                name=row[0],
+                href=row[1],
+                icon=row[2],
+                description=row[3],
+                group_name=row[4],
+            )
+            for row in rows
+        ]
+    except sqlite3.OperationalError as e:
+        logger.debug(f"Error searching services : {e}")
+        return []
