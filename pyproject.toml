@@ -1,0 +1,7 @@
+[tool.pyright]
+reportMissingImports = false
+reportMissingModuleSource = false
+
+[tool.pylint.'MESSAGES CONTROL']
+disable = ["import-error", "missing-module-docstring", "missing-function-docstring", "missing-class-docstring", "too-few-public-methods"]
+

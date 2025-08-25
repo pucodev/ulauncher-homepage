@@ -1,0 +1,25 @@
+{
+  "required_api_version": "2",
+  "name": "Homepage",
+  "description": "Unofficial Homepage extension",
+  "developer_name": "Jorge Estrada",
+  "icon": "images/icon.png",
+  "options": {
+    "query_debounce": 0.1
+  },
+  "preferences": [
+    {
+      "id": "demo_kw",
+      "type": "keyword",
+      "name": "Demo",
+      "description": "Demo extension",
+      "default_value": "dm"
+    },
+    {
+      "id": "api_url",
+      "type": "text",
+      "name": "API URL",
+      "description": "La URL del endpoint que usará la extensión"
+    }
+  ]
+}

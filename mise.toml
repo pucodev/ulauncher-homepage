@@ -1,0 +1,6 @@
+[tools]
+python = "3"
+
+[env]
+_.python.venv = ".venv"
+
