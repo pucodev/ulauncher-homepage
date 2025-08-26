@@ -29,7 +29,8 @@ class SyncEnterEventListener(EventListener):
         makedirs(get_service_icon_folder_path(), exist_ok=True)
         file_path = join(get_service_icon_folder_path(), filename)
         logger.debug("---------- DOWNLOAD ICON ----------")
-        logger.debug(url)
+        logger.debug(f"Download icon: {url}")
+        logger.debug(f"Save icon to: {file_path}")
         logger.debug("-----------------------------------")
 
         r = requests.get(url, timeout=30)

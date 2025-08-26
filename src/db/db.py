@@ -5,10 +5,11 @@ from typing import List
 
 from src.models.ServiceModel import ServiceModel
 from src.utils.logger import logger
+from src.utils.media import get_cache_path
 
 DB_FOLDER = dirname(__file__)
 MIGRATION_FOLDER = join(DB_FOLDER, "migrations")
-DB_FILE = join(MIGRATION_FOLDER, "my_database.db")
+DB_FILE = join(get_cache_path(), "ulauncher-homepage.db")
 
 
 def _get_conn():

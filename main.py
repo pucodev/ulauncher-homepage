@@ -26,7 +26,7 @@ class KeywordQueryEventListener(EventListener):
         for service in services:
             items.append(
                 ExtensionResultItem(
-                    icon="images/icon.png",
+                    icon=service.get_icon_path(),
                     name=service.name,
                     description=service.description,
                     on_enter=OpenUrlAction(service.href),
