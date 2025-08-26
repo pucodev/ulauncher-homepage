@@ -50,11 +50,13 @@ class KeywordQueryEventListener(EventListener):
                     on_enter=OpenUrlAction(service.href),
                 )
             )
+
+        # Add sync data
         items.append(
             ExtensionResultItem(
                 icon="images/icon.png",
-                name="Update Data",
-                description="Click to synchronize services from the Homepage API",
+                name="Sync services",
+                description="Select to synchronize services from the Homepage API",
                 on_enter=ExtensionCustomAction({"action": "sync"}, keep_app_open=False),
             )
         )
