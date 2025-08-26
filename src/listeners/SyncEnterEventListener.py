@@ -1,3 +1,4 @@
+import os
 from os import makedirs
 from os.path import join
 from typing import List
@@ -14,31 +15,35 @@ from src.utils.utils import get_homepage_url, is_valid_homepage_url, plural_text
 
 
 class SyncEnterEventListener(EventListener):
+
     def on_event(self, event, extension):
         data = event.get_data()
 
         if data and data.get("action") == "sync":
             self.fetch_data(extension)
 
-    def clean_icon_name(self, icon):
-        return icon.replace(".png", "").replace(".svg", "")
+    def clean_icon_name(self, icon_filename: str) -> str:
+        """Get the name of the icon without the extension."""
+        return os.path.splitext(icon_filename)[0]
 
-    def download_icon(self, icon_name) -> str:
-        filename = f"{self.clean_icon_name(icon_name)}.png"
+    def download_icon(self, icon_name: str) -> str:
+        """Downloads an icon and returns the path if successful, otherwise an empty string."""
+        filename = f"{icon_name}.png"
         url = f"https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/{filename}"
         makedirs(get_service_icon_folder_path(), exist_ok=True)
         file_path = join(get_service_icon_folder_path(), filename)
-        logger.debug("---------- DOWNLOAD ICON ----------")
-        logger.debug(f"Download icon: {url}")
-        logger.debug(f"Save icon to: {file_path}")
-        logger.debug("-----------------------------------")
 
-        r = requests.get(url, timeout=30)
-        if r.status_code == 200:
+        try:
+            r = requests.get(url, timeout=10)
+            r.raise_for_status()  # Raise an exception for bad status codes
             with open(file_path, "wb") as f:
                 f.write(r.content)
 
-        return str(file_path)
+            logger.debug(f"Successfully downloaded icon to {file_path}")
+            return str(file_path)
+        except requests.RequestException as e:
+            logger.error(f"Failed to download icon '{icon_name}': {e}")
+            return ""
 
     def _save_db(self, items: List[ServiceModel]):
         run_migrations()
@@ -47,25 +52,24 @@ class SyncEnterEventListener(EventListener):
     def fetch_data(self, extension):
         notification = Notification()
 
-        if is_valid_homepage_url(extension):
-            notification.show(title="Syncing services", body="Please wait")
-
-            try:
-                items = self._get_services(extension)
-
-                self._save_db(items)
-
-                self._show_sync_result(notification, items)
-            except (requests.RequestException, ValueError) as e:
-                logger.error(f"Error: {e}")
-                notification.show(
-                    title="Error",
-                    body="There was an unexpected error, please try again",
-                )
-        else:
+        if not is_valid_homepage_url(extension):
             notification.show(
                 title="Error: Homepage url",
                 body="Please enter the homepage URL in the extension configuration",
+            )
+            return
+
+        notification.show(title="Syncing services", body="Please wait...")
+
+        try:
+            items = self._get_services(extension)
+            self._save_db(items)
+            self._show_sync_result(notification, items)
+        except (requests.RequestException, ValueError) as e:
+            logger.error(f"Error fetching data: {e}")
+            notification.show(
+                title="Error",
+                body="An unexpected error occurred, please try again",
             )
 
     def _get_services(self, extension) -> List[ServiceModel]:
@@ -79,14 +83,16 @@ class SyncEnterEventListener(EventListener):
             group_name = group.get("name")
             services = group.get("services") or []
             for service in filter(lambda s: s.get("name") and s.get("href"), services):
-                icon = service.get("icon")
-                if icon:
-                    icon = self.clean_icon_name(icon)
-                    self.download_icon(icon)
+                icon_name = None
+                raw_icon = service.get("icon")
+                if raw_icon:
+                    cleaned_icon_name = self.clean_icon_name(raw_icon)
+                    if self.download_icon(cleaned_icon_name):
+                        icon_name = cleaned_icon_name
 
                 items.append(
                     ServiceModel(
-                        icon=icon,
+                        icon=icon_name,
                         name=service["name"],
                         description=service.get("description"),
                         href=service["href"],
