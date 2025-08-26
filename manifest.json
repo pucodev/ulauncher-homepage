@@ -9,17 +9,16 @@
   },
   "preferences": [
     {
-      "id": "demo_kw",
+      "id": "homepage_keyword",
       "type": "keyword",
-      "name": "Demo",
-      "description": "Demo extension",
-      "default_value": "dm"
+      "name": "Homepage",
+      "default_value": "hp"
     },
     {
       "id": "api_url",
       "type": "text",
       "name": "API URL",
-      "description": "La URL del endpoint que usará la extensión"
+      "description": "The URL of the endpoint that will utilize the extension. Example: `http://localhost:3000`"
     }
   ]
 }

@@ -10,7 +10,7 @@ from src.models.ServiceModel import ServiceModel
 from src.utils.logger import logger
 from src.utils.media import get_service_icon_folder_path
 from src.utils.notification import Notification
-from src.utils.utils import plural_text
+from src.utils.utils import get_homepage_url, is_valid_homepage_url, plural_text
 
 
 class SyncEnterEventListener(EventListener):
@@ -46,23 +46,30 @@ class SyncEnterEventListener(EventListener):
 
     def fetch_data(self, extension):
         notification = Notification()
-        notification.show(title="Syncing services", body="Please wait")
 
-        try:
-            items = self._get_services(extension)
+        if is_valid_homepage_url(extension):
+            notification.show(title="Syncing services", body="Please wait")
 
-            self._save_db(items)
+            try:
+                items = self._get_services(extension)
 
-            self._show_sync_result(notification, items)
-        except (requests.RequestException, ValueError) as e:
-            logger.error(f"Error: {e}")
+                self._save_db(items)
+
+                self._show_sync_result(notification, items)
+            except (requests.RequestException, ValueError) as e:
+                logger.error(f"Error: {e}")
+                notification.show(
+                    title="Error",
+                    body="There was an unexpected error, please try again",
+                )
+        else:
             notification.show(
-                title="Error",
-                body="There was an unexpected error, please try again",
+                title="Error: Homepage url",
+                body="Please enter the homepage URL in the extension configuration",
             )
 
     def _get_services(self, extension) -> List[ServiceModel]:
-        url = extension.preferences.get("api_url")
+        url = get_homepage_url(extension)
         response = requests.get(f"{url}/api/services", timeout=30)
         response.raise_for_status()
         data = response.json()

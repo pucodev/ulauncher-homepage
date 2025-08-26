@@ -18,3 +18,6 @@ class ServiceModel:
             return f"{join(get_service_icon_folder_path(), self.icon)}.png"
 
         return get_icon_path()
+
+    def get_full_description(self):
+        return f"{self.group_name}: {self.description}"

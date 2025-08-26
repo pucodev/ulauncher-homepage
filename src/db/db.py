@@ -90,18 +90,14 @@ def search_services(search: str, limit=5) -> List[ServiceModel]:
             query = """
                 SELECT name, href, icon, description, group_name
                 FROM services
-                WHERE name LIKE ? OR description LIKE ?
+                WHERE name LIKE ? OR description LIKE ? OR group_name LIKE ?
                 LIMIT ?
             """
             pattern = f"%{search}%"
-            cursor.execute(query, (pattern, pattern, limit))
+            cursor.execute(query, (pattern, pattern, pattern, limit))
 
         rows = cursor.fetchall()
         conn.close()
-
-        logger.debug("----------------------")
-        logger.debug(rows)
-        logger.debug("----------------------")
 
         return [
             ServiceModel(
