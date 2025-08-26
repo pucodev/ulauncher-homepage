@@ -47,3 +47,29 @@ def is_valid_homepage_url(extension):
         return False
 
     return True
+
+
+def get_search_limit(extension) -> int:
+    """
+    Try to convert search limit extension to int. If it's empty, None, or not a valid number,
+    return the default value that is `8`.
+
+    Args:
+        extension: Ulauncher extension instance with preferences.
+
+    Returns:
+        int: Parsed integer or default.
+    """
+    default = 8
+    value = extension.preferences.get("search_limit")
+
+    if isinstance(value, int):
+        return value
+
+    if value is None or not str(value).strip():
+        return default
+
+    try:
+        return int(value.strip())
+    except ValueError:
+        return default

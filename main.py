@@ -10,7 +10,7 @@ from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
 from src.db.db import search_services
 from src.listeners.SyncEnterEventListener import SyncEnterEventListener
 from src.utils.media import get_icon_path
-from src.utils.utils import is_valid_homepage_url
+from src.utils.utils import get_search_limit, is_valid_homepage_url
 
 
 class HomepageExtension(Extension):
@@ -38,7 +38,9 @@ class KeywordQueryEventListener(EventListener):
             )
 
         # Search services
-        services = search_services(event.get_argument() or "")
+        services = search_services(
+            event.get_argument() or "", get_search_limit(extension)
+        )
         for service in services:
             items.append(
                 ExtensionResultItem(

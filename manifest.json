@@ -19,6 +19,13 @@
       "type": "text",
       "name": "API URL",
       "description": "The URL of the endpoint that will utilize the extension. Example: `http://localhost:3000`"
+    },
+    {
+      "id": "search_limit",
+      "type": "input",
+      "name": "Max number services to show",
+      "description": "Enter the maximum number of services to show, default is 8",
+      "default_value": 8
     }
   ]
 }
