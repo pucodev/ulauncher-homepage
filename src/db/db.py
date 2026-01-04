@@ -1,6 +1,6 @@
 import sqlite3
 from contextlib import contextmanager
-from os import listdir
+from os import listdir, makedirs
 from os.path import dirname, join
 from typing import List
 
@@ -28,6 +28,7 @@ def _get_conn():
 
 
 def run_migrations():
+    makedirs(dirname(DB_FILE), exist_ok=True)
     with _get_conn() as conn:
         cursor = conn.cursor()
         # Create migration table if not created

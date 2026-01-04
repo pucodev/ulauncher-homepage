@@ -39,3 +39,8 @@ During synchronization, the extension:
 - Saves all the information into a local SQLite database and stores the icons as PNG files. All this data is stored within the Ulauncher cache directory, specifically at `~/.cache/ulauncher_cache/ulauncher-homepage/`.
 
 Once the process is complete, you will receive a notification, and you can then start searching for and launching your services instantly.
+
+## Roadmap
+
+- [ ] Support for Homepage bookmarks in addition to services.
+
